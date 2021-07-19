@@ -37,16 +37,15 @@ namespace kTools.Pooling
         {
             // Set data
             this.source = source;
-            activeInstances = new List<Instance<T>>();
-            instances = new Queue<Instance<T>>();
+            activeInstances = new Dictionary<T, float>();
+            instances = new Queue<T>();
             this.processor = processor;
 
             // Create instances
             for (var i = 0; i < instanceCount; i++)
             {
                 var obj = processor.CreateInstance(key, source);
-                var instance = new Instance<T>(obj);
-                instances.Enqueue(instance);
+                instances.Enqueue(obj);
             }
         }
 
@@ -58,7 +57,7 @@ namespace kTools.Pooling
         {
             // Destroy instances
             var instanceCount = instances.Count;
-            for (var i = 0; i < instanceCount; i++) processor.DestroyInstance(key, instances.Dequeue().obj);
+            for (var i = 0; i < instanceCount; i++) processor.DestroyInstance(key, instances.Dequeue());
         }
 
         #endregion
@@ -71,9 +70,9 @@ namespace kTools.Pooling
 
         public T source { get; }
 
-        public List<Instance<T>> activeInstances { get; }
+        public Dictionary<T, float> activeInstances { get; }
         
-        public Queue<Instance<T>> instances { get; }
+        public Queue<T> instances { get; }
 
         public Processor<T> processor { get; }
 
@@ -83,7 +82,7 @@ namespace kTools.Pooling
 
         public T GetInstance()
         {
-            Instance<T> value = null;
+            T value = default;
 
             // void GetInactiveInstance()
             // {
@@ -120,11 +119,14 @@ namespace kTools.Pooling
 
                 if (instances.Count == 0)
                 {
-                    value = null;
+                    value = default;
                     return;
                 }
 
                 value = instances.Dequeue();
+                
+                // Add the instance to active list
+                activeInstances.Add(value, Time.realtimeSinceStartup);
             }
 
             void GetNewInstance()
@@ -132,8 +134,10 @@ namespace kTools.Pooling
                 if (value != null)
                     return;
                 
-                var obj = processor.CreateInstance(key, source);
-                value = new Instance<T>(obj);
+                value = processor.CreateInstance(key, source);
+                
+                // Add the instance to active list
+                activeInstances.Add(value, Time.realtimeSinceStartup);
             }
 
             void GetOldestInstance()
@@ -147,15 +151,18 @@ namespace kTools.Pooling
                 }
 
                 var oldestTime = Mathf.Infinity;
-                var oldestIndex = 0;
-                for (var i = 0; i < activeInstances.Count; i++)
-                    if (activeInstances[i].activeTime < oldestTime)
+                T oldestInstance = default;
+                foreach (T instances in activeInstances.Keys)
+                {
+                    float instanceTime = activeInstances[instances];
+                    if (instanceTime < oldestTime)
                     {
-                        oldestTime = activeInstances[i].activeTime;
-                        oldestIndex = i;
+                        oldestTime = instanceTime;
+                        oldestInstance = instances;
                     }
+                }
                 
-                value = activeInstances[oldestIndex];
+                value = oldestInstance;
             }
 
             // Get instance
@@ -170,13 +177,9 @@ namespace kTools.Pooling
             }
 
             // Enable instance
-            value.SetActive(true);
-            processor.OnEnableInstance(key, value.obj);
-            
-            // Add the instance to active list
-            activeInstances.Add(value);
-            
-            return value.obj;
+            processor.OnEnableInstance(key, value);
+
+            return value;
         }
 
         public void ReturnInstance(T value)
@@ -193,18 +196,10 @@ namespace kTools.Pooling
             //
             // // Instance not tracked
             // Debug.LogWarning($"Pool ({key}) does not contain object ({value}).");
-
-            for (int i = 0; i < activeInstances.Count; i++)
-            {
-                if (activeInstances[i].obj.Equals(value))
-                {
-                    activeInstances[i].SetActive(false);
-                    processor.OnDisableInstance(key, activeInstances[i].obj);
-                    activeInstances.RemoveAt(i);
-                }
-            }
-            var instance = new Instance<T>(value);
-            instances.Enqueue(instance);
+            
+            processor.OnDisableInstance(key, value);
+            activeInstances.Remove(value);
+            instances.Enqueue(value);
         }
 
         #endregion
