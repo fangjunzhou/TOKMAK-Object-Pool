@@ -24,7 +24,7 @@ Refer to the [Wiki](https://github.com/Kink3d/kPooling/wiki/Home) for more infor
 
 ## Instructions
 - Open your project manifest file (`MyProject/Packages/manifest.json`).
-- Add `"com.kink3d.pooling": "https://github.com/Fangjun-Zhou/TOKMAK-Object-Pool"` to the `dependencies` list.
+- Add `"com.kink3d.pooling": "https://github.com/Fangjun-Zhou/TOKMAK-Object-Pool.git"` to the `dependencies` list.
 - Open or focus on Unity Editor to resolve packages.
 
 ## Requirements
