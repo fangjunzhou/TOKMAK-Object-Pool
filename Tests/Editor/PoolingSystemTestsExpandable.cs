@@ -4,11 +4,11 @@ using UnityEngine.TestTools;
 
 namespace kTools.Pooling.Editor.Tests
 {
-    public sealed class PoolingSystemTests
+    public sealed class PoolingSystemTestsExpandable
     {
         #region Constructors
 
-        public PoolingSystemTests()
+        public PoolingSystemTestsExpandable()
         {
             m_Key = new GameObject("Key");
             m_Obj = new GameObject("Obj");
@@ -23,7 +23,9 @@ namespace kTools.Pooling.Editor.Tests
         public void SetUp()
         {
             // Ensure Pools are set up
-            if (!PoolingSystem.HasPool<GameObject>(m_Key)) PoolingSystem.CreatePool(m_Key, m_Obj, m_InstanceCount);
+            if (PoolingSystem.HasPool<GameObject>(m_Key))
+                PoolingSystem.DestroyPool<GameObject>(m_Key);
+            PoolingSystem.CreatePool(m_Key, m_Obj, m_InstanceCount, true);
         }
 
         #endregion
@@ -75,7 +77,7 @@ namespace kTools.Pooling.Editor.Tests
             Assert.IsNotNull(instance);
             LogAssert.NoUnexpectedReceived();
         }
-        
+
         [Test]
         public void CanGetMultipleInstance()
         {
@@ -92,7 +94,7 @@ namespace kTools.Pooling.Editor.Tests
             Assert.IsTrue(getInstance2);
             Assert.IsNotNull(instance);
             Assert.IsNotNull(instance2);
-            Assert.AreEqual(instance, instance2);
+            Assert.AreNotEqual(instance, instance2);
             LogAssert.NoUnexpectedReceived();
         }
 
@@ -101,10 +103,13 @@ namespace kTools.Pooling.Editor.Tests
         {
             // Setup
             GameObject instance;
+            GameObject instance2;
 
             // Execution
             PoolingSystem.TryGetInstance(m_Key, out instance);
+            PoolingSystem.TryGetInstance(m_Key, out instance2);
             PoolingSystem.ReturnInstance(m_Key, instance);
+            PoolingSystem.ReturnInstance(m_Key, instance2);
 
             // Result
             LogAssert.NoUnexpectedReceived();

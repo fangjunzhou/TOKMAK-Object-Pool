@@ -5,12 +5,14 @@ namespace kTools.Pooling.Editor.Tests
 {
     public static class ProcessorTestResults
     {
-#region Properies
+        #region Properies
+
         public static bool instanceCreated;
         public static bool instanceDestroyed;
         public static bool instanceEnabled;
         public static bool instanceDisabled;
-#endregion
+
+        #endregion
     }
 
     public sealed class TestObject
@@ -19,7 +21,8 @@ namespace kTools.Pooling.Editor.Tests
 
     public sealed class TestProcessor : Processor<TestObject>
     {
-#region Overrides
+        #region Overrides
+
         public override TestObject CreateInstance(object key, TestObject source)
         {
             ProcessorTestResults.instanceCreated = true;
@@ -42,39 +45,44 @@ namespace kTools.Pooling.Editor.Tests
         {
             ProcessorTestResults.instanceDisabled = true;
         }
-#endregion
+
+        #endregion
     }
 
     public sealed class ProcessorTests
     {
-#region Fields
-        readonly TestObject m_Key;
-        readonly TestObject m_Obj;
-        readonly int m_InstanceCount;
-#endregion
+        #region Constructors
 
-#region Constructors
         public ProcessorTests()
         {
             m_Key = new TestObject();
             m_Obj = new TestObject();
             m_InstanceCount = 1;
         }
-#endregion
 
-#region Setup
+        #endregion
+
+        #region Setup
+
         [SetUp]
         public void SetUp()
         {
             // Ensure Pools are set up
-            if(!PoolingSystem.HasPool<TestObject>(m_Key))
-            {
-                PoolingSystem.CreatePool(m_Key, m_Obj, m_InstanceCount);
-            }
+            if (!PoolingSystem.HasPool<TestObject>(m_Key)) PoolingSystem.CreatePool(m_Key, m_Obj, m_InstanceCount);
         }
-#endregion
 
-#region Tests
+        #endregion
+
+        #region Fields
+
+        private readonly TestObject m_Key;
+        private readonly TestObject m_Obj;
+        private readonly int m_InstanceCount;
+
+        #endregion
+
+        #region Tests
+
         [Test]
         public void CanCreateInstance()
         {
@@ -82,7 +90,7 @@ namespace kTools.Pooling.Editor.Tests
             Assert.IsTrue(ProcessorTestResults.instanceCreated);
             LogAssert.NoUnexpectedReceived();
         }
-        
+
         [Test]
         public void CanDestroyInstance()
         {
@@ -99,7 +107,7 @@ namespace kTools.Pooling.Editor.Tests
         {
             // Setup
             TestObject instance;
-            
+
             // Execution
             var getInstance = PoolingSystem.TryGetInstance(m_Key, out instance);
 
@@ -113,7 +121,7 @@ namespace kTools.Pooling.Editor.Tests
         {
             // Setup
             TestObject instance;
-            
+
             // Execution
             PoolingSystem.TryGetInstance(m_Key, out instance);
             PoolingSystem.ReturnInstance(m_Key, instance);
@@ -122,6 +130,7 @@ namespace kTools.Pooling.Editor.Tests
             Assert.IsTrue(ProcessorTestResults.instanceDisabled);
             LogAssert.NoUnexpectedReceived();
         }
-#endregion
+
+        #endregion
     }
 }
