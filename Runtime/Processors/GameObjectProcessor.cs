@@ -5,31 +5,49 @@ namespace kTools.Pooling
 {
     public sealed class GameObjectProcessor : Processor<GameObject>
     {
-#region Fields
-        Dictionary<object, Transform> m_Containers;
-#endregion
+        #region Fields
 
-#region Constructors
+        private readonly Dictionary<object, Transform> m_Containers;
+
+        #endregion
+
+        #region Constructors
+
         public GameObjectProcessor()
         {
             // Set data
             m_Containers = new Dictionary<object, Transform>();
         }
-#endregion
 
-#region Overrides
+        #endregion
+
+        #region GameObject
+
+        private void DestroyGameObject(GameObject gameObject)
+        {
+#if UNITY_EDITOR
+            Object.DestroyImmediate(gameObject);
+#else
+            Object.Destroy(gameObject);
+#endif
+        }
+
+        #endregion
+
+        #region Overrides
+
         public override GameObject CreateInstance(object key, GameObject source)
         {
             // Find container Transform matching key
-            if(!m_Containers.TryGetValue(key, out _))
+            if (!m_Containers.TryGetValue(key, out _))
             {
                 // No matching container Transform so create one
-                Transform container = new GameObject($"Pool - {key}").transform;
+                var container = new GameObject($"Pool - {key}").transform;
                 m_Containers.Add(key, container);
             }
 
             // Create Instance
-            var obj = GameObject.Instantiate(source, Vector3.zero, Quaternion.identity);
+            var obj = Object.Instantiate(source, Vector3.zero, Quaternion.identity);
             obj.name = $"{source.name}(Clone)";
             OnDisableInstance(key, obj);
             return obj;
@@ -42,15 +60,13 @@ namespace kTools.Pooling
 
             // Find container Transform matching key
             Transform container;
-            if(m_Containers.TryGetValue(key, out container))
-            {
+            if (m_Containers.TryGetValue(key, out container))
                 // Last instance so destroy container Transform
-                if(container.childCount == 0)
+                if (container.childCount == 0)
                 {
                     DestroyGameObject(container.gameObject);
                     m_Containers.Remove(key);
                 }
-            }
         }
 
         public override void OnEnableInstance(object key, GameObject instance)
@@ -66,10 +82,7 @@ namespace kTools.Pooling
         {
             // Parenting
             Transform container;
-            if(m_Containers.TryGetValue(key, out container))
-            {
-                instance.transform.SetParent(container);
-            }
+            if (m_Containers.TryGetValue(key, out container)) instance.transform.SetParent(container);
 
             // Active
             instance.SetActive(false);
@@ -79,17 +92,7 @@ namespace kTools.Pooling
             instance.transform.localRotation = Quaternion.identity;
             instance.transform.localScale = Vector3.one;
         }
-#endregion
 
-#region GameObject
-        void DestroyGameObject(GameObject gameObject)
-        {
-            #if UNITY_EDITOR
-            Object.DestroyImmediate(gameObject);
-            #else
-            Object.Destroy(gameObject);
-            #endif
-        }
-#endregion
+        #endregion
     }
 }

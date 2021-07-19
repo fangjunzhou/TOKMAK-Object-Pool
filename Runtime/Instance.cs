@@ -2,34 +2,40 @@ using UnityEngine;
 
 namespace kTools.Pooling
 {
-    sealed class Instance<T>
+    internal sealed class Instance<T>
     {
-#region Fields
-        readonly T m_Obj;
-        bool m_ActiveSelf;
-        float m_ActiveTime;
-#endregion
+        #region Constructors
 
-#region Constructors
         public Instance(T obj)
         {
-            m_Obj = obj;
+            this.obj = obj;
             SetActive(false);
         }
-#endregion
 
-#region Properties
-        public T obj => m_Obj;
-        public bool activeSelf => m_ActiveSelf;
-        public float activeTime => m_ActiveTime;
-#endregion
+        #endregion
 
-#region State
+        #region State
+
         public void SetActive(bool value)
         {
-            m_ActiveSelf = value;
-            m_ActiveTime = value ? Time.realtimeSinceStartup : 0.0f;
+            activeSelf = value;
+            activeTime = value ? Time.realtimeSinceStartup : 0.0f;
         }
-#endregion
-    }    
+
+        #endregion
+
+        #region Fields
+
+        #endregion
+
+        #region Properties
+
+        public T obj { get; }
+
+        public bool activeSelf { get; private set; }
+
+        public float activeTime { get; private set; }
+
+        #endregion
+    }
 }
