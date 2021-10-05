@@ -114,6 +114,22 @@ namespace kTools.Pooling
             Debug.LogWarning($"Pool does not exist with key ({key}).");
         }
 
+        /// <summary>
+        /// The method that remove and dispose all the pools in the Pooling System
+        /// Usually called when exiting the scene
+        /// </summary>
+        public static void CleanUpPool()
+        {
+            while (s_Pools.Count > 0)
+            {
+                Pool pool = s_Pools[0];
+                
+                // Remove Pool
+                s_Pools.Remove(pool);
+                pool.Dispose();
+            }
+        }
+
         private static bool TryGetPool<T>(object key, out Pool<T> value)
         {
             foreach (var pool in s_Pools)
