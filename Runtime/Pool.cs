@@ -27,6 +27,15 @@ namespace kTools.Pooling
         public bool expandable { get; }
 
         #endregion
+
+        #region Public Methods
+
+        public virtual void Dispose()
+        {
+            
+        }
+
+        #endregion
     }
 
     internal sealed class Pool<T> : Pool, IDisposable
@@ -53,7 +62,7 @@ namespace kTools.Pooling
 
         #region IDisposable
 
-        public void Dispose()
+        public override void Dispose()
         {
             // Destroy instances
             var instanceCount = instances.Count;
