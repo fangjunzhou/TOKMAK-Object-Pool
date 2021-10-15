@@ -1,16 +1,16 @@
 # TOKMAK Object Pool
 
-TOKMAK Object Pool是由FinTOKMAK开发组开发的对象池系统。该库Fork自kPooling，请遵守原作者的使用许可。
+TOKMAK Object Pool is a extended version of kPooling.
 
-kPooling仓库地址：https://github.com/Kink3d/kPooling
+Here is the original repo of kPooling: https://github.com/Kink3d/kPooling
 
-## TOKMAK Object Pool新增特性
+## Improvements in TOKMAK Object Pool
 
-TOKMAK Object Pool使用Queue对Object Pool中的物体进行管理，效率略高于kPooling。
+TOKMAK Object Pool uses Queue to manage objects in Object Pool, which is more efficient than kPooling.
 
-除此之外，TOKMAK Object Pool提供了一种额外的Pooling模式：Expandable
+On top of that, TOKMAK Object Pool provides an extra Pooling mode: Expandable
 
-使用Expandable模式时，如果对象池中没有可用的物体，系统会生成新的对象返回给开发者。这一特性在子弹池中较为常用。
+Using Expandable mode, the Object Pool will instantiate new objects instead of recycling the old one in the pool when there's no more object in the pool. This feature is especially useful when implmenting bullet pool.
 
 # kPooling
 ### Customizable Object Pooling for Unity.
